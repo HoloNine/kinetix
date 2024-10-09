@@ -33,6 +33,8 @@ export const isDisabled = () =>
   (typeof defaultSettings.disabled === "function" &&
     defaultSettings.disabled());
 
+const elementState = new WeakMap();
+
 /**
  * Handles the intersection callback for the Intersection Observer.
  *
@@ -51,57 +53,49 @@ const onIntersection = (entries, observer) => {
     const currentRatio = entry.intersectionRatio;
     const isIntersecting = entry.isIntersecting;
 
-    // Retrieve previous values from the element's dataset
-    const previousY = parseFloat(target.dataset.previousY) || 0;
-    const previousRatio = parseFloat(target.dataset.previousRatio) || 0;
+    const { previousY = 0, previousRatio = 0 } = elementState.get(target) || {};
 
     // Handle when scrolling down (element moves upwards in the viewport)
     if (currentY < previousY) {
       if (isIntersecting && currentRatio > previousRatio) {
-        // Simplified condition: element re-enters from the bottom
-        if (target.dataset.state !== "slide-in-bottom") {
-          removeHelperClasses(entry); // Remove previous state before setting a new one
-          target.dataset.state = "slide-in-bottom";
-        }
-      } else if (!isIntersecting || currentRatio < previousRatio) {
-        // Exiting towards the bottom
-        if (target.dataset.state !== "slide-out-bottom") {
-          removeHelperClasses(entry);
-          target.dataset.state = "slide-out-bottom";
-        }
-      }
-    }
-    // Handle when scrolling up (element moves downwards in the viewport)
-    else if (currentY > previousY) {
-      if (currentRatio < previousRatio && !isIntersecting) {
-        // Exiting towards the top
-        if (target.dataset.state !== "slide-out-top") {
-          removeHelperClasses(entry);
-          target.dataset.state = "slide-out-top";
-        }
-      } else if (isIntersecting && currentRatio > previousRatio) {
-        // Entering from the top
         if (target.dataset.state !== "slide-in-top") {
           removeHelperClasses(entry);
           target.dataset.state = "slide-in-top";
         }
+      } else if (!isIntersecting || currentRatio < previousRatio) {
+        if (target.dataset.state !== "slide-out-top") {
+          removeHelperClasses(entry);
+          target.dataset.state = "slide-out-top";
+        }
+      }
+    } else if (currentY > previousY) {
+      if (currentRatio < previousRatio && !isIntersecting) {
+        if (target.dataset.state !== "slide-out-bottom") {
+          removeHelperClasses(entry);
+          target.dataset.state = "slide-out-bottom";
+        }
+      } else if (isIntersecting && currentRatio > previousRatio) {
+        if (target.dataset.state !== "slide-in-bottom") {
+          removeHelperClasses(entry);
+          target.dataset.state = "slide-in-bottom";
+        }
       }
     }
 
-    // Save current values in the element's dataset
-    // target.dataset.previousY = currentY;
-    // target.dataset.previousRatio = currentRatio;
+    // Store current values for the next scroll event
+    elementState.set(target, {
+      previousY: currentY,
+      previousRatio: currentRatio,
+    });
 
     // Apply animation only if the threshold is met or exceeded
     if (currentRatio >= defaultSettings.threshold) {
-      animate(entry);
-
-      // Ensure no observation if animation should not repeat
+      requestAnimationFrame(() => animate(entry)); // Use requestAnimationFrame to batch updates
       if (!shouldRepeat) {
         observer.unobserve(target);
       }
     } else if (shouldRepeat) {
-      reverse(entry);
+      requestAnimationFrame(() => reverse(entry)); // Batch reverse calls as well
     }
   });
 };
