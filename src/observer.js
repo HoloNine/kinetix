@@ -1,9 +1,6 @@
 import { defaultSettings, setSettings } from "./config.js";
 import { animate, reverse, isAnimated, clearAnimation } from "./animations.js";
 
-let previousY = 0;
-let previousRatio = 0;
-
 let elements = [];
 let intersectionObserver = null;
 
@@ -16,8 +13,10 @@ export const disableAnimations = () => {
 };
 
 const clearObserver = () => {
-  intersectionObserver.disconnect();
-  intersectionObserver = null;
+  if (intersectionObserver) {
+    intersectionObserver.disconnect();
+    intersectionObserver = null;
+  }
 };
 
 const removeHelperClasses = (entry) => {
@@ -52,34 +51,52 @@ const onIntersection = (entries, observer) => {
     const currentRatio = entry.intersectionRatio;
     const isIntersecting = entry.isIntersecting;
 
+    // Retrieve previous values from the element's dataset
+    const previousY = parseFloat(target.dataset.previousY) || 0;
+    const previousRatio = parseFloat(target.dataset.previousRatio) || 0;
+
+    // Handle when scrolling down (element moves upwards in the viewport)
     if (currentY < previousY) {
-      if (currentRatio > previousRatio && isIntersecting) {
-        removeHelperClasses(entry);
-        // entry.target.classList.add("enter-bottom");
-        entry.target.dataset.state = "enter-bottom";
-      } else if (currentRatio < previousRatio || !isIntersecting) {
-        removeHelperClasses(entry);
-        // entry.target.classList.add("leave-bottom");
-        entry.target.dataset.state = "leave-bottom";
+      if (isIntersecting && currentRatio > previousRatio) {
+        // Simplified condition: element re-enters from the bottom
+        if (target.dataset.state !== "slide-in-bottom") {
+          removeHelperClasses(entry); // Remove previous state before setting a new one
+          target.dataset.state = "slide-in-bottom";
+        }
+      } else if (!isIntersecting || currentRatio < previousRatio) {
+        // Exiting towards the bottom
+        if (target.dataset.state !== "slide-out-bottom") {
+          removeHelperClasses(entry);
+          target.dataset.state = "slide-out-bottom";
+        }
       }
-    } else if (currentY > previousY) {
-      if (currentRatio < previousRatio) {
-        removeHelperClasses(entry);
-        // entry.target.classList.add("leave-top");
-        entry.target.dataset.state = "leave-top";
-      } else if (currentRatio > previousRatio || !isIntersecting) {
-        removeHelperClasses(entry);
-        // entry.target.classList.add("enter-top");
-        entry.target.dataset.state = "enter-top";
+    }
+    // Handle when scrolling up (element moves downwards in the viewport)
+    else if (currentY > previousY) {
+      if (currentRatio < previousRatio && !isIntersecting) {
+        // Exiting towards the top
+        if (target.dataset.state !== "slide-out-top") {
+          removeHelperClasses(entry);
+          target.dataset.state = "slide-out-top";
+        }
+      } else if (isIntersecting && currentRatio > previousRatio) {
+        // Entering from the top
+        if (target.dataset.state !== "slide-in-top") {
+          removeHelperClasses(entry);
+          target.dataset.state = "slide-in-top";
+        }
       }
     }
 
-    previousY = currentY;
-    previousRatio = currentRatio;
+    // Save current values in the element's dataset
+    // target.dataset.previousY = currentY;
+    // target.dataset.previousRatio = currentRatio;
 
-    if (entry.intersectionRatio >= defaultSettings.threshold) {
+    // Apply animation only if the threshold is met or exceeded
+    if (currentRatio >= defaultSettings.threshold) {
       animate(entry);
 
+      // Ensure no observation if animation should not repeat
       if (!shouldRepeat) {
         observer.unobserve(target);
       }
