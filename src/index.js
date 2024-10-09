@@ -1,42 +1,15 @@
-import "./index.css";
-
-import { setOptions, defaultOptions } from "./config.js";
+import { defaultSettings, setSettings } from "./config";
 import { disable, enable, reset, update, isDisabled } from "./observer.js";
 
-const init = (settings = defaultOptions) => {
-  setOptions(settings);
+const kinetix = (settings = defaultSettings) => {
+  setSettings(settings);
 
-  const elements = Array.from(
-    document.querySelectorAll(defaultOptions.selector)
+  const observeElements = Array.from(
+    document.querySelectorAll(defaultSettings.selector)
   );
-
-  elements.forEach((element) => {
-    const duration =
-      element.dataset.animationDuration || defaultOptions.animationDuration;
-    const delay =
-      element.dataset.animationDelay || defaultOptions.animationDelay;
-
-    element.style.transitionDuration = `${duration}ms`;
-    element.style.transitionDelay = `${delay}ms`;
-  });
-
-  if (typeof window === "undefined") {
-    return {
-      disable,
-      enable,
-      reset,
-      update,
-    };
-  }
-
-  if (!window.IntersectionObserver) {
-    disableAnimations();
-  }
 
   if (!isDisabled()) {
     enable();
-  } else {
-    disableAnimations();
   }
 
   return {
@@ -47,4 +20,4 @@ const init = (settings = defaultOptions) => {
   };
 };
 
-export default init;
+export default kinetix;

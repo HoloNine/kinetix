@@ -1,4 +1,4 @@
-import { defaultOptions, setOptions } from "./config.js";
+import { defaultSettings, setSettings } from "./config.js";
 import { animate, reverse, isAnimated, clearAnimation } from "./animations.js";
 
 let previousY = 0;
@@ -8,11 +8,11 @@ let elements = [];
 let intersectionObserver = null;
 
 const enableAnimations = () => {
-  document.body.classList.remove(defaultOptions.disabledClassName);
+  document.body.classList.remove(defaultSettings.disabledClassName);
 };
 
-const disableAnimations = () => {
-  document.body.classList.add(defaultOptions.disabledClassName);
+export const disableAnimations = () => {
+  document.body.classList.add(defaultSettings.disabledClassName);
 };
 
 const clearObserver = () => {
@@ -21,10 +21,7 @@ const clearObserver = () => {
 };
 
 const removeHelperClasses = (entry) => {
-  entry.target.classList.remove("down-enter");
-  entry.target.classList.remove("down-leave");
-  entry.target.classList.remove("up-enter");
-  entry.target.classList.remove("up-leave");
+  entry.target.dataset.state = "";
 };
 
 /**
@@ -33,8 +30,9 @@ const removeHelperClasses = (entry) => {
  * @returns {boolean} Returns true if the observer is disabled, false otherwise.
  */
 export const isDisabled = () =>
-  defaultOptions.disabled ||
-  (typeof defaultOptions.disabled === "function" && defaultOptions.disabled());
+  defaultSettings.disabled ||
+  (typeof defaultSettings.disabled === "function" &&
+    defaultSettings.disabled());
 
 /**
  * Handles the intersection callback for the Intersection Observer.
@@ -47,7 +45,8 @@ const onIntersection = (entries, observer) => {
     const { target } = entry;
     const hasRepeatFlag = target.dataset.animationRepeat !== undefined;
     const hasOnceFlag = target.dataset.animationOnce !== undefined;
-    const shouldRepeat = hasRepeatFlag || !(hasOnceFlag || defaultOptions.once);
+    const shouldRepeat =
+      hasRepeatFlag || !(hasOnceFlag || defaultSettings.once);
 
     const currentY = entry.boundingClientRect.y;
     const currentRatio = entry.intersectionRatio;
@@ -55,30 +54,30 @@ const onIntersection = (entries, observer) => {
 
     if (currentY < previousY) {
       if (currentRatio > previousRatio && isIntersecting) {
-        // console.log("Scrolling down enter");
         removeHelperClasses(entry);
-        entry.target.classList.add("down-enter");
+        // entry.target.classList.add("enter-bottom");
+        entry.target.dataset.state = "enter-bottom";
       } else if (currentRatio < previousRatio || !isIntersecting) {
-        // console.log("Scrolling down leave");
         removeHelperClasses(entry);
-        entry.target.classList.add("down-leave");
+        // entry.target.classList.add("leave-bottom");
+        entry.target.dataset.state = "leave-bottom";
       }
     } else if (currentY > previousY) {
       if (currentRatio < previousRatio) {
-        // console.log("Scrolling up leave");
         removeHelperClasses(entry);
-        entry.target.classList.add("up-leave");
+        // entry.target.classList.add("leave-top");
+        entry.target.dataset.state = "leave-top";
       } else if (currentRatio > previousRatio || !isIntersecting) {
-        // console.log("Scrolling up enter");
         removeHelperClasses(entry);
-        entry.target.classList.add("up-enter");
+        // entry.target.classList.add("enter-top");
+        entry.target.dataset.state = "enter-top";
       }
     }
 
     previousY = currentY;
     previousRatio = currentRatio;
 
-    if (entry.intersectionRatio >= defaultOptions.threshold) {
+    if (entry.intersectionRatio >= defaultSettings.threshold) {
       animate(entry);
 
       if (!shouldRepeat) {
@@ -97,8 +96,8 @@ const onIntersection = (entries, observer) => {
  */
 export const getObservedElements = () => {
   const collection = [].filter.call(
-    document.querySelectorAll(defaultOptions.selector),
-    (element) => !isAnimated(element, defaultOptions.animateClassName)
+    document.querySelectorAll(defaultSettings.selector),
+    (element) => !isAnimated(element)
   );
 
   collection.forEach((element) => intersectionObserver.observe(element));
@@ -118,9 +117,9 @@ export const enable = () => {
   enableAnimations();
 
   intersectionObserver = new IntersectionObserver(onIntersection, {
-    root: defaultOptions.root,
-    rootMargin: defaultOptions.rootMargin,
-    threshold: defaultOptions.threshold,
+    root: defaultSettings.root,
+    rootMargin: defaultSettings.rootMargin,
+    threshold: defaultSettings.threshold,
   });
 
   elements = getObservedElements();
@@ -134,11 +133,11 @@ export const enable = () => {
 export const reset = (settings = {}) => {
   clearObserver();
 
-  Array.from(document.querySelectorAll(defaultOptions.selector)).forEach(
+  Array.from(document.querySelectorAll(defaultSettings.selector)).forEach(
     clearAnimation
   );
 
-  setOptions(settings);
+  setSettings(settings);
   enable();
 };
 

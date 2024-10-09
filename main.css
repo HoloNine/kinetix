@@ -2,3 +2,10 @@
   max-width: 905px;
   margin-inline: auto;
 }
+
+.kinetix {
+  min-height: 30vh;
+  background-color: gray;
+  margin-bottom: 96px;
+}
+

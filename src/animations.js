@@ -1,13 +1,13 @@
-import { defaultOptions } from "./config.js";
+import { defaultSettings } from "./config.js";
 import { dispatchEvent } from "./events.js";
 
 /**
- * Clears the animation from the specified element.
+ * Clears the animation state of the given element.
  *
- * @param {HTMLElement} element - The element to clear the animation from.
+ * @param {HTMLElement} element - The DOM element whose animation state is to be cleared.
  */
 export const clearAnimation = (element) => {
-  element.classList.remove(defaultOptions.animateClassName);
+  element.dataset.animate = false;
 };
 
 /**
@@ -16,8 +16,8 @@ export const clearAnimation = (element) => {
  * @param {IntersectionObserverEntry} entry - The entry object containing information about the target element.
  */
 export const animate = (entry) => {
-  entry.target.classList.add(defaultOptions.animateClassName);
-  dispatchEvent(defaultOptions.enterEventName, entry);
+  entry.target.dataset.animate = true;
+  dispatchEvent(defaultSettings.enterEventName, entry);
 };
 
 /**
@@ -27,7 +27,7 @@ export const animate = (entry) => {
  */
 export const reverse = (entry) => {
   clearAnimation(entry.target);
-  dispatchEvent(defaultOptions.exitEventName, entry);
+  dispatchEvent(defaultSettings.exitEventName, entry);
 };
 
 /**
@@ -36,5 +36,4 @@ export const reverse = (entry) => {
  * @param {HTMLElement} element - The element to check.
  * @returns {boolean} Returns true if the element is animated, false otherwise.
  */
-export const isAnimated = (element) =>
-  element.classList.contains(defaultOptions.animateClassName);
+export const isAnimated = (element) => element.dataset.animate === true;
