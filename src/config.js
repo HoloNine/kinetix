@@ -14,7 +14,7 @@
  */
 export let defaultSettings = {
   root: null,
-  rootMargin: "0% 30%",
+  rootMargin: "0% 10%",
   threshold: 0.5,
   animateClassName: "kinetix-animate",
   disabledClassName: "kinetix-disabled",
