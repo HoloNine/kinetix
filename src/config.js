@@ -23,6 +23,7 @@ export let defaultSettings = {
   selector: ".kinetix",
   once: false,
   disabled: false,
+  animation: "slide",
 };
 
 /**

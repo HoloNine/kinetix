@@ -1,5 +1,5 @@
 import { defaultSettings, setSettings } from "./config.js";
-import { animate, reverse, isAnimated, clearAnimation } from "./animations.js";
+import { isAnimated, clearAnimation, applyAnimation } from "./animations.js";
 
 let elements = [];
 let intersectionObserver = null;
@@ -88,14 +88,13 @@ const onIntersection = (entries, observer) => {
       previousRatio: currentRatio,
     });
 
-    // Apply animation only if the threshold is met or exceeded
     if (currentRatio >= defaultSettings.threshold) {
-      requestAnimationFrame(() => animate(entry)); // Use requestAnimationFrame to batch updates
+      requestAnimationFrame(() => applyAnimation(entry, true)); // Custom animation on entry
       if (!shouldRepeat) {
         observer.unobserve(target);
       }
     } else if (shouldRepeat) {
-      requestAnimationFrame(() => reverse(entry)); // Batch reverse calls as well
+      requestAnimationFrame(() => applyAnimation(entry, false)); // Custom animation on exit
     }
   });
 };

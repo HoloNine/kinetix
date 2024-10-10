@@ -1,5 +1,4 @@
 import { defaultSettings } from "./config.js";
-import { dispatchEvent } from "./events.js";
 
 /**
  * Clears the animation state of the given element.
@@ -11,29 +10,50 @@ export const clearAnimation = (element) => {
 };
 
 /**
- * Animates the target element.
- *
- * @param {IntersectionObserverEntry} entry - The entry object containing information about the target element.
- */
-export const animate = (entry) => {
-  entry.target.dataset.animate = true;
-  dispatchEvent(defaultSettings.enterEventName, entry);
-};
-
-/**
- * Reverses the animation by clearing the animation target and dispatching the exit event.
- *
- * @param {Object} entry - The animation entry object.
- */
-export const reverse = (entry) => {
-  clearAnimation(entry.target);
-  dispatchEvent(defaultSettings.exitEventName, entry);
-};
-
-/**
  * Checks if an element is animated.
  *
  * @param {HTMLElement} element - The element to check.
  * @returns {boolean} Returns true if the element is animated, false otherwise.
  */
 export const isAnimated = (element) => element.dataset.animate === true;
+
+// Helper function to apply inline styles for sliding animations
+export const slideAnimation = (entry, direction) => {
+  const { target } = entry;
+  if (direction === "in") {
+    target.style.transform = "translateY(0)";
+    target.style.opacity = "1";
+  } else {
+    target.style.transform =
+      direction === "up" ? "translateY(-200%)" : "translateY(200%)";
+    target.style.opacity = "0";
+  }
+};
+
+// Helper function to apply inline styles for fading animations
+export const fadeAnimation = (entry, direction) => {
+  const { target } = entry;
+  if (direction === "in") {
+    target.style.opacity = "1";
+  } else {
+    target.style.opacity = "0";
+  }
+};
+
+// Function to handle which animation to apply based on settings
+export const applyAnimation = (entry, isEntering) => {
+  const animationType = defaultSettings.animation;
+
+  switch (animationType) {
+    case "slide":
+      const direction = entry.boundingClientRect.y < 0 ? "up" : "down";
+      slideAnimation(entry, isEntering ? "in" : direction);
+      break;
+    case "fade":
+      fadeAnimation(entry, isEntering ? "in" : "out");
+      break;
+    default:
+      // Fallback if no valid animation type is provided
+      break;
+  }
+};
