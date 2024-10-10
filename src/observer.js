@@ -19,9 +19,9 @@ const clearObserver = () => {
   }
 };
 
-const removeHelperClasses = (entry) => {
-  entry.target.dataset.state = "";
-};
+// const removeHelperClasses = (entry) => {
+//   entry.target.dataset.state = "";
+// };
 
 /**
  * Checks if the observer is disabled based on the default options.
@@ -51,36 +51,36 @@ const onIntersection = (entries, observer) => {
 
     const currentY = entry.boundingClientRect.y;
     const currentRatio = entry.intersectionRatio;
-    const isIntersecting = entry.isIntersecting;
 
-    const { previousY = 0, previousRatio = 0 } = elementState.get(target) || {};
+    // const isIntersecting = entry.isIntersecting;
+    // const { previousY = 0, previousRatio = 0 } = elementState.get(target) || {};
 
     // Handle when scrolling down (element moves upwards in the viewport)
-    if (currentY < previousY) {
-      if (isIntersecting && currentRatio > previousRatio) {
-        if (target.dataset.state !== "slide-in-top") {
-          removeHelperClasses(entry);
-          target.dataset.state = "slide-in-top";
-        }
-      } else if (!isIntersecting || currentRatio < previousRatio) {
-        if (target.dataset.state !== "slide-out-top") {
-          removeHelperClasses(entry);
-          target.dataset.state = "slide-out-top";
-        }
-      }
-    } else if (currentY > previousY) {
-      if (currentRatio < previousRatio && !isIntersecting) {
-        if (target.dataset.state !== "slide-out-bottom") {
-          removeHelperClasses(entry);
-          target.dataset.state = "slide-out-bottom";
-        }
-      } else if (isIntersecting && currentRatio > previousRatio) {
-        if (target.dataset.state !== "slide-in-bottom") {
-          removeHelperClasses(entry);
-          target.dataset.state = "slide-in-bottom";
-        }
-      }
-    }
+    // if (currentY < previousY) {
+    //   if (isIntersecting && currentRatio > previousRatio) {
+    //     if (target.dataset.state !== "slide-in-top") {
+    //       removeHelperClasses(entry);
+    //       target.dataset.state = "slide-in-top";
+    //     }
+    //   } else if (!isIntersecting || currentRatio < previousRatio) {
+    //     if (target.dataset.state !== "slide-out-top") {
+    //       removeHelperClasses(entry);
+    //       target.dataset.state = "slide-out-top";
+    //     }
+    //   }
+    // } else if (currentY > previousY) {
+    //   if (currentRatio < previousRatio && !isIntersecting) {
+    //     if (target.dataset.state !== "slide-out-bottom") {
+    //       removeHelperClasses(entry);
+    //       target.dataset.state = "slide-out-bottom";
+    //     }
+    //   } else if (isIntersecting && currentRatio > previousRatio) {
+    //     if (target.dataset.state !== "slide-in-bottom") {
+    //       removeHelperClasses(entry);
+    //       target.dataset.state = "slide-in-bottom";
+    //     }
+    //   }
+    // }
 
     // Store current values for the next scroll event
     elementState.set(target, {
@@ -110,7 +110,15 @@ export const getObservedElements = () => {
     (element) => !isAnimated(element)
   );
 
-  collection.forEach((element) => intersectionObserver.observe(element));
+  // Apply initial hidden styles to all elements outside the viewport
+  collection.forEach((element) => {
+    // Set initial hidden state (transform and opacity) for all elements
+    element.style.transform = "translateY(200%)"; // Off-screen by default
+    element.style.opacity = "0"; // Fully hidden by default
+
+    // Observe the element using the IntersectionObserver
+    intersectionObserver.observe(element);
+  });
 
   return collection;
 };
