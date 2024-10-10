@@ -11,8 +11,6 @@
  * @property {string} selector - CSS selector for elements to animate.
  * @property {boolean} once - Whether the animation should only run once.
  * @property {boolean} disabled - Whether animations are disabled.
- * @property {number} animationDuration - Duration of the animation in milliseconds.
- * @property {number} animationDelay - Delay before the animation starts in milliseconds.
  */
 export let defaultSettings = {
   root: null,
@@ -25,8 +23,6 @@ export let defaultSettings = {
   selector: ".kinetix",
   once: false,
   disabled: false,
-  animationDuration: 300,
-  animationDelay: 30,
 };
 
 /**
