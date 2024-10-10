@@ -23,15 +23,16 @@ export const slideAnimation = (entry, direction) => {
   if (direction === "in") {
     target.style.transform = "translateY(0)";
     target.style.opacity = "1";
+    target.style.blur = "0";
   } else {
     target.style.transform =
-      direction === "up" ? "translateY(-200%)" : "translateY(200%)";
+      direction === "up" ? "translateY(-100%)" : "translateY(100%)";
     target.style.opacity = "0";
+    target.style.blur = "4px";
   }
 };
 
-// Helper function to apply inline styles for fading animations
-export const fadeAnimation = (entry, direction) => {
+const fadeAnimation = (entry, direction) => {
   const { target } = entry;
   if (direction === "in") {
     target.style.opacity = "1";
@@ -43,15 +44,14 @@ export const fadeAnimation = (entry, direction) => {
 // Function to handle which animation to apply based on settings
 export const applyAnimation = (entry, isEntering) => {
   const animationType = defaultSettings.animation;
+  const direction = entry.boundingClientRect.y < 0 ? "up" : "down";
 
   switch (animationType) {
     case "slide":
-      const direction = entry.boundingClientRect.y < 0 ? "up" : "down";
       slideAnimation(entry, isEntering ? "in" : direction);
       break;
     case "fade":
-      fadeAnimation(entry, isEntering ? "in" : "out");
-      break;
+      fadeAnimation(entry, isEntering ? "in" : direction);
     default:
       // Fallback if no valid animation type is provided
       break;
