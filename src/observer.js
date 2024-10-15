@@ -3,6 +3,7 @@ import { isAnimated, clearAnimation, applyAnimation } from "./animations.js";
 
 let elements = [];
 let intersectionObserver = null;
+const elementState = new WeakMap();
 
 const enableAnimations = () => {
   document.body.classList.remove(defaultSettings.disabledClassName);
@@ -19,9 +20,9 @@ const clearObserver = () => {
   }
 };
 
-// const removeHelperClasses = (entry) => {
-//   entry.target.dataset.state = "";
-// };
+const removeHelperClasses = (entry) => {
+  entry.target.dataset.state = "";
+};
 
 /**
  * Checks if the observer is disabled based on the default options.
@@ -33,14 +34,42 @@ export const isDisabled = () =>
   (typeof defaultSettings.disabled === "function" &&
     defaultSettings.disabled());
 
-const elementState = new WeakMap();
+const isIntersecting = (entry, target) => {
+  const currentY = entry.boundingClientRect.y;
+  const currentRatio = entry.intersectionRatio;
 
-/**
- * Handles the intersection callback for the Intersection Observer.
- *
- * @param {IntersectionObserverEntry[]} entries - The array of intersection entries.
- * @param {IntersectionObserver} observer - The Intersection Observer instance.
- */
+  const isIntersecting = entry.isIntersecting;
+  const { previousY = 0, previousRatio = 0 } = elementState.get(target) || {};
+
+  if (currentY < previousY) {
+    if (isIntersecting && currentRatio > previousRatio) {
+      if (target.dataset.state !== "in") {
+        removeHelperClasses(entry);
+        target.dataset.state = "in";
+      }
+    } else if (!isIntersecting || currentRatio < previousRatio) {
+      if (target.dataset.state !== "out") {
+        removeHelperClasses(entry);
+        target.dataset.state = "out";
+      }
+    }
+  } else if (currentY > previousY) {
+    if (currentRatio < previousRatio && !isIntersecting) {
+      if (target.dataset.state !== "out") {
+        removeHelperClasses(entry);
+        target.dataset.state = "out";
+      }
+    } else if (isIntersecting && currentRatio > previousRatio) {
+      if (target.dataset.state !== "in") {
+        removeHelperClasses(entry);
+        target.dataset.state = "in";
+      }
+    }
+  }
+
+  return { currentY, currentRatio };
+};
+
 const onIntersection = (entries, observer) => {
   entries.forEach((entry) => {
     const { target } = entry;
@@ -49,38 +78,7 @@ const onIntersection = (entries, observer) => {
     const shouldRepeat =
       hasRepeatFlag || !(hasOnceFlag || defaultSettings.once);
 
-    const currentY = entry.boundingClientRect.y;
-    const currentRatio = entry.intersectionRatio;
-
-    // const isIntersecting = entry.isIntersecting;
-    // const { previousY = 0, previousRatio = 0 } = elementState.get(target) || {};
-
-    // Handle when scrolling down (element moves upwards in the viewport)
-    // if (currentY < previousY) {
-    //   if (isIntersecting && currentRatio > previousRatio) {
-    //     if (target.dataset.state !== "slide-in-top") {
-    //       removeHelperClasses(entry);
-    //       target.dataset.state = "slide-in-top";
-    //     }
-    //   } else if (!isIntersecting || currentRatio < previousRatio) {
-    //     if (target.dataset.state !== "slide-out-top") {
-    //       removeHelperClasses(entry);
-    //       target.dataset.state = "slide-out-top";
-    //     }
-    //   }
-    // } else if (currentY > previousY) {
-    //   if (currentRatio < previousRatio && !isIntersecting) {
-    //     if (target.dataset.state !== "slide-out-bottom") {
-    //       removeHelperClasses(entry);
-    //       target.dataset.state = "slide-out-bottom";
-    //     }
-    //   } else if (isIntersecting && currentRatio > previousRatio) {
-    //     if (target.dataset.state !== "slide-in-bottom") {
-    //       removeHelperClasses(entry);
-    //       target.dataset.state = "slide-in-bottom";
-    //     }
-    //   }
-    // }
+    const { currentY, currentRatio } = isIntersecting(entry, target);
 
     // Store current values for the next scroll event
     elementState.set(target, {
@@ -89,12 +87,12 @@ const onIntersection = (entries, observer) => {
     });
 
     if (currentRatio >= defaultSettings.threshold) {
-      requestAnimationFrame(() => applyAnimation(entry, true)); // Custom animation on entry
+      requestAnimationFrame(() => applyAnimation(entry, true));
       if (!shouldRepeat) {
         observer.unobserve(target);
       }
     } else if (shouldRepeat) {
-      requestAnimationFrame(() => applyAnimation(entry, false)); // Custom animation on exit
+      requestAnimationFrame(() => applyAnimation(entry, false));
     }
   });
 };
@@ -112,10 +110,6 @@ export const getObservedElements = () => {
 
   // Apply initial hidden styles to all elements outside the viewport
   collection.forEach((element) => {
-    // Set initial hidden state (transform and opacity) for all elements
-    element.style.transform = "translateY(200%)"; // Off-screen by default
-    element.style.opacity = "0"; // Fully hidden by default
-
     // Observe the element using the IntersectionObserver
     intersectionObserver.observe(element);
   });
