@@ -1,5 +1,5 @@
 import {defaultSettings, setSettings} from "./config.js";
-import {isAnimated, clearAnimation, applyAnimation} from "./animations.js";
+import {isAnimated, applyAnimation} from "./animations.js";
 
 let elements = [];
 let intersectionObserver = null;

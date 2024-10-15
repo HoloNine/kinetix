@@ -1,13 +1,5 @@
 import {defaultSettings} from "./config.js";
 
-/**
- * Clears the animation state of the given element.
- *
- * @param {HTMLElement} element - The DOM element whose animation state is to be cleared.
- */
-export const clearAnimation = (element) => {
-    element.dataset.animate = false;
-};
 
 /**
  * Checks if an element is animated.
