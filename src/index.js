@@ -1,19 +1,19 @@
-import { defaultSettings, setSettings } from "./config";
-import { disable, enable, reset, update, isDisabled } from "./observer.js";
+import {defaultSettings, setSettings} from "./config";
+import {disable, enable, reset, update, isDisabled} from "./observer.js";
 
 const kinetix = (settings = defaultSettings) => {
-  setSettings(settings);
+    setSettings(settings);
 
-  if (!isDisabled()) {
-    enable();
-  }
+    if (!isDisabled()) {
+        enable();
+    }
 
-  return {
-    disable,
-    enable,
-    reset,
-    update,
-  };
+    return {
+        disable,
+        enable,
+        reset,
+        update,
+    };
 };
 
 export default kinetix;

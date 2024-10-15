@@ -11,19 +11,20 @@
  * @property {string} selector - CSS selector for elements to animate.
  * @property {boolean} once - Whether the animation should only run once.
  * @property {boolean} disabled - Whether animations are disabled.
+ * @property {string} animation - The animation to apply.
  */
 export let defaultSettings = {
-  root: null,
-  rootMargin: "0% 10%",
-  threshold: 0.5,
-  animateClassName: "kinetix-animate",
-  disabledClassName: "kinetix-disabled",
-  enterEventName: "animation:in",
-  exitEventName: "animation:out",
-  selector: ".kinetix",
-  once: false,
-  disabled: false,
-  animation: "slide",
+    root: null,
+    rootMargin: "0% 10%",
+    threshold: 0.5,
+    animateClassName: "kinetix-animate",
+    disabledClassName: "kinetix-disabled",
+    enterEventName: "animation:in",
+    exitEventName: "animation:out",
+    selector: ".kinetix",
+    once: false,
+    disabled: false,
+    animation: "slide",
 };
 
 /**
@@ -32,10 +33,10 @@ export let defaultSettings = {
  * @param {Object} settings - An object containing the settings to be updated.
  */
 export const setSettings = (settings) => {
-  if (settings) {
-    defaultSettings = {
-      ...defaultSettings,
-      ...settings,
-    };
-  }
+    if (settings) {
+        defaultSettings = {
+            ...defaultSettings,
+            ...settings,
+        };
+    }
 };

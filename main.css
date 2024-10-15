@@ -3,9 +3,17 @@
   margin-inline: auto;
 }
 
+.row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  gap: 6rem;
+}
+
 .kinetix {
   min-height: 30vh;
   background-color: gray;
   margin-bottom: 96px;
-  transition: all 0.5s cubic-bezier(0.075, 0.82, 0.165, 1);
+  /*transition: all 0.5s cubic-bezier(0.075, 0.82, 0.165, 1);*/
+  width: 50%;
 }
